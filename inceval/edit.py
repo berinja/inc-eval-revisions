@@ -54,6 +54,7 @@ class EditQualities:
 
     @staticmethod
     def edited(previous_label, current_label):
+        """Return True if labels differ."""
         return previous_label != current_label
 
     def set_effectiveness(self, previous_label: Label, current_label: Label,
@@ -101,6 +102,7 @@ class EditQualities:
             self.steady = True
 
     def set_oscillation(self, vertical_seq: array):
+        """Set the oscillation attribute of the edit."""
         edits = vertical_seq[vertical_seq != EMPTY]
         assert not edits.sum() < 2, "Label not edited!"
         if edits.sum() == 2:
@@ -199,6 +201,7 @@ class EditQualityChart:
 
     def _build_edit(self, time_id: int, label_id: int, outputs: array,
                     edits: array, gold: array) -> EditQualities:
+        """Extract all subcomponents and build an edit object."""
         # get some specific components
         current_label = outputs[time_id, label_id]
         previous_label = outputs[time_id - 1, label_id]
@@ -212,5 +215,4 @@ class EditQualityChart:
         edit.set_qualities(
             current_label, previous_label, gold_label, previous_labels,
             current_edits, vertical_edits, time_id, label_id, self.n_tokens)
-    
         return edit

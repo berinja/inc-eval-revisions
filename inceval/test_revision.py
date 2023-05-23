@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-function-docstring
 """
 Tests for revision.py.
 """
@@ -12,7 +14,7 @@ from inceval.revision import RevisionQualities, RevisionSeq
 
 
 class TestRevisionQualities(unittest.TestCase):
-    """Test container for all revision qualities."""
+    """Tests for all revision qualities."""
 
     def setUp(self):
         self.revisions = [RevisionQualities(range_param=i) for i in range(15)]
@@ -83,7 +85,7 @@ class TestRevisionQualities(unittest.TestCase):
         self.revisions[4].set_recurrence(time_step, revsteps)
         self.assertTrue(self.revisions[4].recurrent)
         self.assertFalse(self.revisions[4].steady)
-    
+
     def test_set_oscillation(self):
         revsteps = [0, 1, 5, 8, 9]
         self.revisions[0].set_oscillation(revsteps)
@@ -143,7 +145,6 @@ class TestRevisionQualities(unittest.TestCase):
         self.assertTrue(self.revisions[4].long_range)
         self.assertFalse(self.revisions[4].short_range)
         self.assertFalse(self.revisions[4].short_and_long_range)
-        
 
     def test_set_definiteness(self):
         time_step = 3
@@ -173,7 +174,9 @@ class TestRevisionQualities(unittest.TestCase):
 
 
 class TestRevisionSeq:
-    pass
+    """Tests for the sequence of revisions."""
+    ...
+
 
 if __name__ == '__main__':
     unittest.main()

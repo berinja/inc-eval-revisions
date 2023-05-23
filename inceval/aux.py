@@ -19,3 +19,7 @@ GOLD = Criterion.GOLD
 def build_empty_chart(n: int, filler: Optional[float] = EMPTY) -> np.array:
     """Initialize a chart with a given shape, filled with EMPTY default."""
     return np.full([n, n], filler, dtype='O')
+
+def accuracy(x: np.array, y: np.array) -> float:
+    """Fraction of labels that match in x and y."""
+    return np.mean(x == y)

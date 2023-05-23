@@ -10,9 +10,8 @@ from typing import List, Optional, Union
 
 import numpy as np
 import pandas as pd
-from sklearn.metrics import accuracy_score as accuracy
 
-from inceval.aux import build_empty_chart, EMPTY, Criterion, SILVER, GOLD
+from inceval.aux import build_empty_chart, EMPTY, Criterion, SILVER, GOLD, accuracy
 from inceval.edit import EditQualityChart, EditQualities
 from inceval.revision import RevisionSeq
 
@@ -33,7 +32,7 @@ class IncOutputs:
     additions. All other entries that are 1 are substitions. The upper part
     is filled with the EMPTY constant as fillers.
     """
-    def __init__(self, n: int, gold: Optional[Prefix] = None, 
+    def __init__(self, n: int, gold: Optional[Prefix] = None,
                  recomputations: Optional[np.array] = None,
                  eval_mode: Criterion = SILVER):
         self.eval_mode = eval_mode
@@ -263,8 +262,8 @@ class IncOutputs:
     @property
     def n_revision_and_correct_prefix(self) -> int:
         """How many revisions on correct prefixes."""
-        # we need to compare whether a revision at time step t edited a prefix
-        # that was correct at time step (t-1)
+        # NOTE: we need to compare whether a revision at time step t edited a
+        # prefix that was correct at time step (t-1)
         shifted_steps = np.array(self.revision_timesteps) - 1
         intersect = set(shifted_steps) & set(self.correct_prefixes)
         return len(intersect)
@@ -272,8 +271,8 @@ class IncOutputs:
     @property
     def n_revision_and_incorrect_prefix(self) -> int:
         """How many revisions on incorrect prefixes."""
-        # we need to compare whether a revision at time step t edited a prefix
-        # that was correct at time step (t-1)
+        # NOTE: we need to compare whether a revision at time step t edited a
+        # prefix that was incorrect at time step (t-1)
         shifted_steps = np.array(self.revision_timesteps) - 1
         intersect = set(shifted_steps) & set(self.incorrect_prefixes)
         return len(intersect)
@@ -281,13 +280,13 @@ class IncOutputs:
     @property
     def n_write_and_correct_prefix(self) -> int:
         """How many writes on correct prefixes."""
-        # we need to compare whether a revision at time step t edited a prefix
-        # that was correct at time step (t-1)
+        # NOTE: we need to compare whether a write at time step t extended a
+        # prefix that was correct at time step (t-1)
         shifted_steps = np.array(self.write_timesteps) - 1
         intersect = set(shifted_steps) & set(self.correct_prefixes)
-        # FIXME: decide whether to add 1 here or not
-        # by definition, we can set that the empty prefix is correct
-        # and it will always be a write
+        # NOTE: we decided to add 1 here, i.e. to consider that the
+        # emtpy prefix is correct and is always a write; this gives a bit
+        # of advantage to the model evaluation
         # either we do this, or we have to change the total number of writes
         # otherwise the total won't sum to the number of time steps
         return len(intersect) + 1
@@ -295,8 +294,8 @@ class IncOutputs:
     @property
     def n_write_and_incorrect_prefix(self) -> int:
         """How many writes on incorrect prefixes."""
-        # we need to compare whether a revision at time step t edited a prefix
-        # that was correct at time step (t-1)
+        # NOTE: we need to compare whether a write at time step t extended a
+        # prefix that was incorrect at time step (t-1)
         shifted_steps = np.array(self.write_timesteps) - 1
         intersect = set(shifted_steps) & set(self.incorrect_prefixes)
         return len(intersect)
@@ -305,72 +304,73 @@ class IncOutputs:
     def r_pertinence(self) -> float:
         """Revisions on incorrect prefixes divided by all revisions."""
         if self.n_revisions == 0:
-            return 0
+            return np.nan
         return self.n_revision_and_incorrect_prefix / self.n_revisions
 
     @property
     def r_pertinence_complement(self) -> float:
         """Revisions on correct prefixes divided by all revisions."""
         if self.n_revisions == 0:
-            return 0
+            return np.nan
         return self.n_revision_and_correct_prefix / self.n_revisions
 
     @property
     def a_pertinence(self) -> float:
         """Writes on correct prefixes divided by all writes."""
         if self.n_writes == 0:
-            return 0
+            return np.nan
         return self.n_write_and_correct_prefix / self.n_writes
 
     @property
     def a_pertinence_complement(self) -> float:
         """Writes on incorrect prefixes divided by all writes."""
         if self.n_writes == 0:
-            return 0
+            return np.nan
         return self.n_write_and_incorrect_prefix / self.n_writes
 
     @property
     def r_appropriateness(self) -> float:
         """Revisions on incorrect prefixes divided by all incorrect prefixes"""
-        if self.n_incorrect_prefixes() == 0:
-            return 0
+        if self.n_incorrect_prefixes == 0:
+            return np.nan
         return self.n_revision_and_incorrect_prefix / self.n_incorrect_prefixes
 
     @property
     def r_appropriateness_complement(self) -> float:
-        """Revisions on correct prefixes divided by all correct prefixes."""
-        if self.n_correct_prefixes() == 0:
-            return 0
-        return self.n_revision_and_correct_prefix / self.n_correct_prefixes
+        """Writes on incorrect prefixes divided by all incorrect prefixes."""
+        if self.n_correct_prefixes == 0:
+            return np.nan
+        return self.n_write_and_incorrect_prefix / self.n_incorrect_prefixes
 
     @property
     def a_appropriateness(self) -> float:
         """Writes on correct prefixes divided by all correct prefixes."""
-        if self.n_correct_prefixes() == 0:
-            return 0
+        if self.n_correct_prefixes == 0:
+            return np.nan
         return self.n_write_and_correct_prefix / self.n_correct_prefixes
 
     @property
     def a_appropriateness_complement(self) -> float:
-        """Writes on incorrect prefixes divided by all incorrect prefixes."""
-        if self.n_incorrect_prefixes() == 0:
-            return 0
-        return self.n_write_and_incorrect_prefix / self.n_incorrect_prefixes()
+        """Revisions on correct prefixes divided by all correct prefixes."""
+        if self.n_correct_prefixes == 0:
+            return np.nan
+        return self.n_revision_and_correct_prefix / self.n_correct_prefixes
 
     @property
-    def edit_overhead(self):
+    def edit_overhead(self) -> float:
         """Edit overhead metric on incremental chart."""
         necessary_edits = self.edits.diagonal().sum()
         unnecessary_edits = self.edits.sum() - necessary_edits
         return unnecessary_edits / (necessary_edits + unnecessary_edits)
 
+    def delayed_edit_overhead(self, delay: int) -> float:
+        """Edit overhead with delay."""
+        pass
+
     @property
     def relative_correctness(self) -> float:
         """Relative-correctness metric on incremental chart."""
-        final = self.final_output
-        n_correct = len([t for t, row in enumerate(self.chart)
-                         if np.array_equal(row[:t+1], final[:t+1])])
-        return n_correct / self.n_tokens
+        return self.n_correct_prefixes / self.n_tokens
 
     @property
     def correction_time_score(self) -> float:
@@ -429,8 +429,7 @@ class IncOutputs:
     @property
     def n_edit_groups_per_revision(self) -> np.array:
         """Number of groups of edits for each time step with a revision."""
-        edit_groups_per_timestep = self.n_edit_groups_per_revision()
-        return edit_groups_per_timestep[self.revision_timesteps]
+        return self.n_edit_groups_per_revision[self.revision_timesteps]
 
     @property
     def edit_distances(self) -> List[List]:
@@ -499,5 +498,5 @@ class IncOutputs:
 
     def perc_edits_with_quality(self, quality: str) -> float:
         """% of all edits that have a certain quality."""
-        return 100 * self.total_edits_with_quality(quality) / self.n_total_edits
         #which_total =  if mode == 'edits' else self.total_possible_edits
+        return 100 * self.total_edits_with_quality(quality) / self.n_total_edits

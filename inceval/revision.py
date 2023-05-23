@@ -78,6 +78,7 @@ class RevisionQualities:
             self.steady = True
 
     def set_oscillation(self, revsteps: List[int]) -> None:
+        """Set the oscillation attribute of the revision."""
         if len(revsteps) > 1:
             self.oscillating = True
         elif len(revsteps) ==  1:
@@ -178,9 +179,10 @@ class RevisionSeq:
                 outputs, edits, gold, revision_timesteps, time_step)
             seq[time_step] = revision
         return seq
-    
+
     def _build_revision(self, outputs: array, edits: array, gold: array,
                         revision_timesteps: List[int], time_step: int):
+        """Extract all subcomponents and build a revision object."""
         current_prefix = outputs[time_step, : time_step]
         previous_prefix = outputs[time_step - 1, : time_step]
         gold_prefix = gold[:time_step]

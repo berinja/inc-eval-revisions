@@ -9,3 +9,13 @@ The plots and table in the paper have been generated using ```analysis-tapir.ipy
 
 ## Evaluating other models
 The scripts in ```inceval``` implement all the metrics and characteristics described in the paper. Full documentation will be added.
+
+## Design decisions
+
+- the first write is counted as occurring in a correct (empty) prefix
+- the revision metrics are np.nan when no revision/addition occurred
+
+
+## TODOs
+
+- implement other metrics from Baumann: delay etc

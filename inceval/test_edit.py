@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# pylint: disable=missing-module-docstring
+# pylint: disable=missing-function-docstring
 """
 Tests for edit.py.
 """
@@ -13,7 +15,7 @@ from inceval.aux import EMPTY
 
 
 class TestEditQualities(unittest.TestCase):
-    """Test container for all edit's qualities."""
+    """Tests for all edit's qualities."""
 
     def setUp(self):
         self.edits = [EditQualities(range_param=i) for i in range(15)]
@@ -75,7 +77,7 @@ class TestEditQualities(unittest.TestCase):
         self.edits[0].set_recurrence(3, 4, vertical_seq, 8)
         self.assertFalse(self.edits[0].steady)
         self.assertTrue(self.edits[0].recurrent)
-    
+
         vertical_seq = np.array([EMPTY, EMPTY, EMPTY, 1, 1, 0, 0, 0])
         self.edits[1].set_recurrence(3, 4, vertical_seq, 8)
         self.assertTrue(self.edits[1].steady)
@@ -256,7 +258,9 @@ class TestEditQualities(unittest.TestCase):
 
 
 class TestEditQualityChart:
-    pass
+    """Tests for the EditQualityChart."""
+    ...
+
 
 if __name__ == '__main__':
     unittest.main()
